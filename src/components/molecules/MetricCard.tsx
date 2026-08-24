@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
 import { clsx } from 'clsx';
+import { InteractionCard } from '../motion/InteractionCard';
 
 interface MetricCardProps {
   title: string;
@@ -8,6 +11,7 @@ interface MetricCardProps {
   icon: React.ReactNode;
   trend?: string;
   className?: string;
+  onClick?: () => void;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -17,33 +21,41 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   icon,
   trend,
   className,
+  onClick,
 }) => {
   return (
-    <div
+    <InteractionCard
+      onClick={onClick}
       className={clsx(
-        'p-5 rounded-2xl bg-white border border-[#BEC3C8] shadow-card hover:shadow-cardHover transition-shadow',
+        'p-5 sm:p-6 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-govCard',
         className
       )}
     >
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#2C638A]">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           {title}
         </span>
-        <div className="p-2 rounded-xl bg-[#E8EBEB] text-[#0C3B5D]">
+        <div className="p-2.5 rounded-xl bg-gov-blueLight dark:bg-slate-800 text-gov-navy dark:text-sky-400 shadow-sm">
           {icon}
         </div>
       </div>
 
       <div className="mt-3">
-        <div className="text-2xl lg:text-3xl font-extrabold tracking-tight text-[#0C3B5D]">{value}</div>
-        {subtitle && <p className="text-xs text-[#302D2D]/70 font-medium mt-1">{subtitle}</p>}
+        <div className="text-2xl sm:text-3xl font-black tracking-tight text-gov-navy dark:text-sky-200">
+          {value}
+        </div>
+        {subtitle && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 truncate">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       {trend && (
-        <div className="mt-2 text-[11px] font-bold text-[#2C638A]">
+        <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
           {trend}
         </div>
       )}
-    </div>
+    </InteractionCard>
   );
 };

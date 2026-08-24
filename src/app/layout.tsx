@@ -3,18 +3,19 @@ import './globals.css';
 import { Navbar } from '@/components/organisms/Navbar';
 
 export const metadata: Metadata = {
-  title: 'SIR-Assist | Government Field Verification PWA',
-  description: 'Offline-First Legacy Voter Roll (2002-04) Verification & On-Device OCR System',
+  title: 'SIR-Assist | Official Government Voter Verification Portal',
+  description:
+    'Statutory Offline-First Legacy Voter Roll (2002-04) Verification & On-Device Zero-Leak OCR Audit Engine',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'SIR-Assist',
+    title: 'SIR-Assist Gov',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0C3B5D',
+  themeColor: '#1A237E',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -27,11 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icon-192.svg" type="image/svg+xml" />
       </head>
-      <body className="min-h-screen bg-[#FDFEFE] text-[#302D2D] flex flex-col antialiased selection:bg-[#AC6953] selection:text-white">
+      <body className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] text-slate-800 dark:text-slate-100 flex flex-col antialiased selection:bg-gov-navy selection:text-white transition-colors duration-200">
         <Navbar />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-12">
           {children}

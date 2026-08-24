@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
-import { Check, Scan, Search, ClipboardCheck, ShieldCheck } from 'lucide-react';
+import { Check, UploadCloud, Scan, ClipboardCheck, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface StepProgressProps {
   currentStep: number;
@@ -7,10 +10,10 @@ interface StepProgressProps {
 }
 
 const STEPS = [
-  { id: 1, label: 'Document OCR', icon: Scan },
-  { id: 2, label: 'Legacy Match', icon: Search },
-  { id: 3, label: 'Rule Engine', icon: ClipboardCheck },
-  { id: 4, label: 'Crypto Seal', icon: ShieldCheck },
+  { id: 1, label: 'Upload', subtitle: 'Smart Dropzone', icon: UploadCloud },
+  { id: 2, label: 'Scan', subtitle: 'On-Device OCR', icon: Scan },
+  { id: 3, label: 'Verify', subtitle: 'Decadal Match', icon: ClipboardCheck },
+  { id: 4, label: 'Finish', subtitle: 'Crypto Stamp', icon: ShieldCheck },
 ];
 
 export const StepProgress: React.FC<StepProgressProps> = ({
@@ -18,8 +21,8 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   onSelectStep,
 }) => {
   return (
-    <div className="w-full py-2">
-      <div className="flex items-center justify-between max-w-2xl mx-auto px-4">
+    <div className="w-full py-1">
+      <div className="flex items-center justify-between max-w-2xl mx-auto px-2">
         {STEPS.map((step, idx) => {
           const Icon = step.icon;
           const isCompleted = currentStep > step.id;
@@ -27,45 +30,59 @@ export const StepProgress: React.FC<StepProgressProps> = ({
 
           return (
             <React.Fragment key={step.id}>
-              {/* Step Node */}
+              {/* Step Circle & Label */}
               <button
+                type="button"
                 onClick={() => isCompleted && onSelectStep?.(step.id)}
                 disabled={!isCompleted && !isCurrent}
-                className={`group flex flex-col items-center gap-1.5 focus:outline-none transition-all ${
-                  isCompleted ? 'cursor-pointer' : isCurrent ? 'cursor-default' : 'cursor-not-allowed opacity-40'
+                className={`group flex flex-col items-center gap-1 focus:outline-none transition-all ${
+                  isCompleted
+                    ? 'cursor-pointer'
+                    : isCurrent
+                    ? 'cursor-default'
+                    : 'cursor-not-allowed opacity-50'
                 }`}
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-300 ${
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm border-2 transition-all duration-300 ${
                     isCompleted
-                      ? 'bg-[#0C3B5D] border-[#0C3B5D] text-white shadow-sm'
+                      ? 'bg-gov-navy border-gov-navy text-white shadow-md'
                       : isCurrent
-                      ? 'bg-[#AC6953] border-[#AC6953] text-white ring-4 ring-[#AC6953]/20 shadow-md scale-105'
-                      : 'bg-white border-[#BEC3C8] text-[#BEC3C8]'
+                      ? 'bg-gov-green border-gov-green text-white ring-4 ring-gov-green/25 shadow-lg scale-105'
+                      : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500'
                   }`}
                 >
-                  {isCompleted ? <Check className="w-5 h-5 stroke-[2.5]" /> : <Icon className="w-4 h-4" />}
+                  {isCompleted ? (
+                    <Check className="w-5 h-5 stroke-[2.8]" />
+                  ) : (
+                    <Icon className="w-5 h-5" />
+                  )}
                 </div>
-                <span
-                  className={`text-[11px] md:text-xs font-bold tracking-tight transition-colors ${
-                    isCurrent
-                      ? 'text-[#AC6953]'
-                      : isCompleted
-                      ? 'text-[#0C3B5D]'
-                      : 'text-slate-400'
-                  }`}
-                >
-                  {step.label}
-                </span>
+                <div className="text-center">
+                  <span
+                    className={`text-xs font-bold tracking-tight block ${
+                      isCurrent
+                        ? 'text-gov-navy dark:text-sky-300 font-extrabold'
+                        : isCompleted
+                        ? 'text-slate-700 dark:text-slate-300'
+                        : 'text-slate-400 dark:text-slate-500'
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 hidden sm:block">
+                    {step.subtitle}
+                  </span>
+                </div>
               </button>
 
-              {/* Connecting line */}
+              {/* Connecting Progress Line */}
               {idx < STEPS.length - 1 && (
-                <div className="flex-1 h-[2px] mx-2 -mt-5 bg-[#BEC3C8]/50 relative overflow-hidden rounded">
+                <div className="flex-1 h-[3px] mx-2 sm:mx-3 -mt-6 bg-slate-200 dark:bg-slate-700 relative overflow-hidden rounded-full">
                   <div
-                    className={`h-full transition-all duration-500 ${
+                    className={`h-full transition-all duration-500 rounded-full ${
                       currentStep > step.id
-                        ? 'bg-[#0C3B5D] w-full'
+                        ? 'bg-gov-navy dark:bg-sky-500 w-full'
                         : 'w-0'
                     }`}
                   />

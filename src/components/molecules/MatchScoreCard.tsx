@@ -1,8 +1,11 @@
+'use client';
+
 import React from 'react';
-import { CheckCircle2, AlertTriangle, XCircle, ArrowRight, UserCheck } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, XCircle, ArrowRight, UserCheck, ShieldCheck } from 'lucide-react';
 import { SearchMatchResult } from '@/lib/db/sqlite-indexeddb-engine';
 import { Badge } from '../atoms/Badge';
 import { Button } from '../atoms/Button';
+import { InteractionCard } from '../motion/InteractionCard';
 
 interface MatchScoreCardProps {
   match: SearchMatchResult;
@@ -26,7 +29,7 @@ export const MatchScoreCard: React.FC<MatchScoreCardProps> = ({
     }
     if (score >= 70) {
       return (
-        <Badge variant="amber" icon={<AlertTriangle className="w-3 h-3" />}>
+        <Badge variant="gold" icon={<AlertTriangle className="w-3 h-3" />}>
           {score}% SOUNDEX MATCH
         </Badge>
       );
@@ -39,51 +42,59 @@ export const MatchScoreCard: React.FC<MatchScoreCardProps> = ({
   };
 
   return (
-    <div
+    <InteractionCard
       onClick={() => onSelect?.(match)}
-      className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer shadow-sm ${
+      className={`p-4 sm:p-5 rounded-2xl cursor-pointer shadow-govCard ${
         isSelected
-          ? 'bg-[#E8EBEB]/60 border-[#AC6953] ring-2 ring-[#AC6953]/20 shadow-md'
-          : 'bg-white border-[#BEC3C8] hover:border-[#2C638A] hover:bg-[#FDFEFE]'
+          ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-2 border-emerald-500 dark:border-emerald-600 ring-2 ring-emerald-400/20'
+          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-gov-navy dark:hover:border-sky-400'
       }`}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <h4 className="text-base font-bold text-[#0C3B5D]">{match.fullName}</h4>
-            <span className="text-xs px-2 py-0.5 rounded bg-[#E8EBEB] text-[#0C3B5D] font-mono font-bold">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              {match.fullName}
+            </h4>
+            <span className="text-xs px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-gov-navy dark:text-sky-300 font-mono font-bold border border-slate-200 dark:border-slate-700">
               {match.epicNo}
             </span>
           </div>
 
-          <p className="text-xs text-[#302D2D]/80 mt-1">
-            <span className="text-[#2C638A] font-semibold">Relative:</span> {match.relativeName} (
-            {match.relationType}) • <span className="text-[#2C638A] font-semibold">Age:</span> {match.age} •{' '}
-            <span className="text-[#2C638A] font-semibold">Gender:</span> {match.gender}
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+            <span className="text-slate-400 dark:text-slate-500 font-medium">Relative:</span>{' '}
+            <strong className="text-slate-700 dark:text-slate-200">{match.relativeName}</strong> (
+            {match.relationType}) •{' '}
+            <span className="text-slate-400 dark:text-slate-500 font-medium">Age:</span> {match.age} •{' '}
+            <span className="text-slate-400 dark:text-slate-500 font-medium">Gender:</span> {match.gender}
           </p>
         </div>
 
-        <div>{getScoreBadge(match.matchScore)}</div>
+        <div className="self-start sm:self-auto">{getScoreBadge(match.matchScore)}</div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-[#BEC3C8]/60 flex flex-wrap items-center justify-between gap-2 text-xs text-[#302D2D]/80">
-        <div className="flex items-center gap-4">
+      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <span>
-            <strong className="text-[#0C3B5D]">Part:</strong> {match.partNo} (Sec {match.sectionNo})
+            <strong className="text-gov-navy dark:text-sky-300 font-semibold">Part:</strong>{' '}
+            {match.partNo} (Sec {match.sectionNo})
           </span>
           <span>
-            <strong className="text-[#0C3B5D]">Serial:</strong> #{match.serialNo}
+            <strong className="text-gov-navy dark:text-sky-300 font-semibold">Serial:</strong> #
+            {match.serialNo}
           </span>
-          <span className="hidden sm:inline">
-            <strong className="text-[#0C3B5D]">Soundex:</strong>{' '}
-            <code className="text-[#AC6953] font-mono font-bold">{match.soundexName}</code>
+          <span className="hidden md:inline">
+            <strong className="text-slate-400 font-semibold">Soundex:</strong>{' '}
+            <code className="text-gov-navy dark:text-sky-300 font-mono font-bold bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded">
+              {match.soundexName}
+            </code>
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           {isSelected ? (
-            <span className="text-xs font-bold text-[#AC6953] flex items-center gap-1">
-              <UserCheck className="w-4 h-4" /> Selected Linkage
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 bg-emerald-100/70 dark:bg-emerald-950/80 px-2.5 py-1 rounded-xl">
+              <UserCheck className="w-4 h-4" /> Linkage Confirmed
             </span>
           ) : (
             <Button
@@ -100,6 +111,6 @@ export const MatchScoreCard: React.FC<MatchScoreCardProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </InteractionCard>
   );
 };
