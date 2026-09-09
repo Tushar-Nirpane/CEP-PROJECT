@@ -28,6 +28,7 @@ import { InteractionCard } from '@/components/motion/InteractionCard';
 import { useSyncStore } from '@/stores/syncStore';
 import { useVerificationStore } from '@/stores/verificationStore';
 import { legacyRollEngine } from '@/lib/db/sqlite-indexeddb-engine';
+import { getHealth } from '@/lib/api/sir-assist-client';
 
 export default function DashboardPage() {
   const { pendingBundles, isOnline, initializeStore } = useSyncStore();
@@ -36,8 +37,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     initializeStore();
-    legacyRollEngine.initialize().then(setTotalRecords);
+    // Try to get live count from backend; fall back to offline IDB count
+    getHealth()
+      .then((h) => setTotalRecords(h.legacy_roll_count))
+      .catch(() => legacyRollEngine.initialize().then(setTotalRecords));
   }, [initializeStore]);
+
 
   return (
     <div className="space-y-8">

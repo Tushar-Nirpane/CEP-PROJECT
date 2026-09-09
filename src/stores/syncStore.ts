@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { get, set } from 'idb-keyval';
 import { EncryptedSyncBundle } from '../lib/crypto/sync-bundle';
+import { uploadSyncBundles } from '../lib/api/sir-assist-client';
 
 const SYNC_BUNDLES_STORAGE_KEY = 'sir_assist_encrypted_sync_bundles_v1';
 const SYNC_HISTORY_STORAGE_KEY = 'sir_assist_sync_history_v1';
@@ -100,16 +101,24 @@ export const useSyncStore = create<SyncStoreState>((setStore, getStore) => ({
     setStore({ isSyncing: true });
 
     try {
-      // Simulate network upload with latency and validation
-      await new Promise((res) => setTimeout(res, 1800));
+      // Build the payload for the backend
+      const payload = pendingBundles.map((b) => ({
+        bundle_id: b.bundleId,
+        officer_id: b.officerId,
+        part_no: b.metadata?.partNo ?? '',
+        encrypted_payload: b.encryptedData,
+        created_at: b.timestamp,
+      }));
 
-      const count = pendingBundles.length;
+      const response = await uploadSyncBundles(payload);
+      const count = response.received;
+
       const newHistoryItem: SyncedBatchRecord = {
         batchId: 'BATCH-' + Date.now().toString(36).toUpperCase(),
         count,
         syncedAt: new Date().toISOString(),
         status: 'SUCCESS',
-        responseRef: 'GOV-UPLINK-ACK-' + crypto.randomUUID().slice(0, 6).toUpperCase(),
+        responseRef: `SIR-UPLINK-${response.message.slice(0, 20)}`,
       };
 
       const existingHistory = getStore().syncHistory;
@@ -128,15 +137,25 @@ export const useSyncStore = create<SyncStoreState>((setStore, getStore) => ({
       return {
         success: true,
         syncedCount: count,
-        message: `Successfully uploaded and verified ${count} encrypted bundle(s) to Central Ingestion Gateway.`,
+        message: `Successfully uploaded ${count} encrypted bundle(s) to the SIR-Assist backend.`,
       };
     } catch (err: any) {
-      setStore({ isSyncing: false });
+      const failedHistory: SyncedBatchRecord = {
+        batchId: 'BATCH-' + Date.now().toString(36).toUpperCase(),
+        count: pendingBundles.length,
+        syncedAt: new Date().toISOString(),
+        status: 'FAILED',
+        responseRef: 'UPLINK_ERROR',
+      };
+      const updatedHistory = [failedHistory, ...getStore().syncHistory];
+      setStore({ isSyncing: false, syncHistory: updatedHistory });
+      await set(SYNC_HISTORY_STORAGE_KEY, updatedHistory);
       return {
         success: false,
         syncedCount: 0,
-        message: err?.message || 'Uplink transmission failure.',
+        message: err?.message || 'Uplink transmission failure. Bundles remain queued.',
       };
     }
   },
 }));
+
