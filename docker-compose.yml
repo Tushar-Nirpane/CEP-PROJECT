@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sir_assist_db
+    environment:
+      POSTGRES_USER: sir_user
+      POSTGRES_PASSWORD: sir_password
+      POSTGRES_DB: sir_assist
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/00_init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sir_user -d sir_assist"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sir_assist_api
+    environment:
+      # DB URL uses the service name 'db' for container-to-container networking
+      DATABASE_URL: "postgresql+asyncpg://sir_user:sir_password@db:5432/sir_assist"
+      # CORS: allow the frontend origin (browser-accessible host)
+      CORS_ORIGIN: "http://localhost:3000"
+      APP_ENV: "development"
+      DB_QUERY_TIMEOUT_SECONDS: "10"
+      MAX_REQUEST_BODY_BYTES: "1048576"
+      DUPLICATE_WINDOW_MINUTES: "60"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # BACKEND_URL is the internal Docker network address of the FastAPI service.
+        # Next.js rewrites() proxies all /api/* calls to this URL at BUILD time.
+        BACKEND_URL: "http://api:8000"
+    container_name: sir_assist_frontend
+    environment:
+      NODE_ENV: "production"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
